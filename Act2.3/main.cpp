@@ -1,42 +1,16 @@
-#include <iostream>
+//Emiliano García Aguirre A00827638 
+//Jesús Urquídez Calvo A00828368
+//Adrian Gonzalez Saldivar A00827845
+
 #include <vector>
 #include <fstream>
 #include <sstream>
 #include <string>
+#include "DoubleLinkedList.h"
 
-using namespace std;
-
-struct dato{
-  int key;
-  string linea;
-  string ip;
-  string ip2;
-  string ip3;
-  string ip4;
-  string ip5;
-  long ipp;
-}; 
-
-
-int burbuja(vector<dato> &vec){
-  bool interruptor = true;
-  dato tmp;
-  int cont = 0;
-  for (int i=0; i<vec.size()-1 && interruptor; i++) {
-    interruptor = false; // no se han hecho intercambios
-    for (int j=0; j<vec.size()-1-i; j++) {
-      cont++; //contador
-      if (vec[j+1].ipp < vec[j].ipp) {
-        tmp = vec[j];
-        vec[j] = vec[j+1];
-        vec[j+1] = tmp;
-        interruptor = true;
-      }
-    }
-  }
-  return cont;
-}
-void ahoraSi(dato &v){
+//Descripcion: Agrega 0 iniciales a cada parte de un ip para tener el mismo tamaño de datos
+//Complejidad : O(n)
+void conversionLong(dato &v){
   while(v.ip.length() < 3) v.ip = '0' + v.ip;
   while(v.ip2.length() < 2) v.ip2 = '0' + v.ip2;
   while(v.ip3.length() < 3) v.ip3 = '0' + v.ip3;
@@ -45,36 +19,68 @@ void ahoraSi(dato &v){
   v.ipp = v.ipp*1000000 + stoi(v.ip4 + v.ip5);
 }
 
+//Descripcion: Agrega 0 iniciales a cada parte del número para tener el mismo tamaño de datos que los ip
+//Complejidad : O(n)
+long conversionString(string num, string num2, string num3, string num4, string num5){
+  long nume;
+  while(num.length() < 3) num = '0' + num;
+  while(num2.length() < 2) num2= '0' + num2;
+  while(num3.length() < 3) num3 = '0' + num3;
+  while(num4.length() < 2) num4 = '0' + num4;
+  nume = stoi(num + num2 + num3);
+  return nume = (nume*1000000 + stoi(num4 + num5));
+}
+
+//Descripcion: Separa la variable numero en 5 string y lo manda a conversionString
+//Complejidad: O(1)
+long convertir(string numero){
+  string num, num2, num3, num4, num5;
+  stringstream s(numero);
+  getline(s, num, '.');//3
+  getline(s,num2,'.');//2
+  getline(s,num3,'.');//3
+  getline(s,num4,':');//2
+  getline(s,num5);//4
+  return conversionString(num,num2,num3,num4,num5);
+}
+
 int main() {
+  long n, last, minimo, maximo;
+  string mini, maxi;
+  char seguir;
   fstream fin;
   dato registro;
-  vector<dato> orden;
-int p=0;
-  fin.open("bitacora.txt",ios::in);
+  DoubleLinkedList lista;
+  string ss;
+  fin.open("bitacora.txt",ios::in); 
+  // Duración con "datos.txt" (fragmento de bitácora)= instantáneo
+  // Duración con "bitacora.txt" = 28 minutos  
   while(!fin.eof()){
     getline(fin,registro.linea);
-    orden.push_back(registro);
-  }
-  fin.close();
-
-  string ss;
-  for(int i = 0; i<orden.size(); i++){ 
-    stringstream s(orden[i].linea);
+    stringstream s(registro.linea);
     getline(s,ss,' ');
     getline(s,ss,' ');
     getline(s,ss,' ');
-    getline(s,orden[i].ip, '.');//3
-    getline(s,orden[i].ip2,'.');//2
-    getline(s,orden[i].ip3,'.');//3
-    getline(s,orden[i].ip4,':');//2
-    getline(s,orden[i].ip5,' ');//4
-    ahoraSi(orden[i]);
+    getline(s,registro.ip, '.');//3
+    getline(s,registro.ip2,'.');//2
+    getline(s,registro.ip3,'.');//3
+    getline(s,registro.ip4,':');//2
+    getline(s,registro.ip5,' ');//4
+    conversionLong(registro);
+    lista.addFirst(registro);
   }
-
-  burbuja(orden);
-
-  for(int i = 0; i<orden.size(); i++){
-    cout << i << " " << orden[i].linea << endl;
-  }
-
+  lista.burbuja();
+  fin.close(); 
+  do{
+  cout << endl << "Ingresa los valores de búsqueda de ip: ";
+  cin >> mini;
+  cout << "Ingresa los valores del rango final de ip: ";
+  cin >> maxi;
+  n = convertir(mini);
+  last = convertir(maxi);
+  lista.print(n,last); 
+  cout << endl << "Desea hacer otra consulta? : Y/N" << endl;
+  cin >> (seguir);
+  }while((toupper(seguir)) == 'Y'); 
+  cout << "Terminado";
 }
